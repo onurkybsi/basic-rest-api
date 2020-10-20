@@ -19,15 +19,32 @@ func checkError(err error) {
 
 const mongoPass string = "?"
 
-var mongoConnectionURI string = fmt.Sprintf("mongodb+srv://admin:%s@mymongodb.oiync.mongodb.net/<dbname>?retryWrites=true&w=majority", mongoPass)
+var mongoConnectionURI string = fmt.Sprintf("mongodb+srv://admin:%s@mymongodb.oiync.mongodb.net/my-apps-db?retryWrites=true&w=majority", mongoPass)
 
 // GetAllPeople : Return all data from "people" collection of "my_apps_db" database
 func GetAllPeople() []*models.Person {
+
+	return getPeopleByFilter(bson.M{})
+}
+
+// GetPeopleByName : Return people that matched by name
+func GetPeopleByName(name string) []*models.Person {
+	filter := bson.M{
+		"$or": []bson.M{
+			bson.M{"firstName": name},
+			bson.M{"lastName": name},
+		},
+	}
+
+	return getPeopleByFilter(filter)
+}
+
+func getPeopleByFilter(filter bson.M) []*models.Person {
 	var people []*models.Person
 
 	mongoClient := connectToMongoDB()
 
-	cur, err := mongoClient.Database("my_apps_db").Collection("people").Find(context.TODO(), bson.D{{}})
+	cur, err := mongoClient.Database("my_apps_db").Collection("people").Find(context.TODO(), filter)
 	checkError(err)
 
 	for cur.Next(context.TODO()) {

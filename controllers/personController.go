@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/basic-rest-api/db"
@@ -28,7 +27,6 @@ func GetPeopleByName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(searchModel.Name)
 	res := db.GetPeopleByName(searchModel.Name)
 
 	w.Header().Set("Content-Type", "application/json")

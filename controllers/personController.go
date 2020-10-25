@@ -32,3 +32,19 @@ func GetPeopleByName(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(res)
 }
+
+// InsertPerson : Insert given Person object
+func InsertPerson(w http.ResponseWriter, r *http.Request) {
+	var insertedPerson models.Person
+
+	err := json.NewDecoder(r.Body).Decode(&insertedPerson)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	res := db.InsertPerson(insertedPerson)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(res)
+}

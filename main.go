@@ -13,6 +13,7 @@ func main() {
 
 	router.HandleFunc("/people", controllers.GetPeople).Methods("GET")
 	router.HandleFunc("/people", controllers.GetPeopleByName).Methods("POST")
+	router.HandleFunc("/people/insert", controllers.InsertPerson).Methods("POST")
 
 	fmt.Println("Listening on 8000...")
 

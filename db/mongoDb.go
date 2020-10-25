@@ -11,13 +11,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func checkError(err error) {
+func checkError(err error) bool {
 	if err != nil {
 		log.Fatal(err)
+
+		return true
 	}
+
+	return false
 }
 
 const mongoConnectionURI string = "mongodb://localhost:27017/my_apps_db"
+const dbName string = "my_apps_db"
+const collectionName string = "people"
 
 // GetAllPeople : Return all data from "people" collection of "my_apps_db" database
 func GetAllPeople() []*models.Person {
@@ -37,12 +43,32 @@ func GetPeopleByName(name string) []*models.Person {
 	return getPeopleByFilter(filter)
 }
 
+// InsertPerson : Insert given Person document
+func InsertPerson(insertedPerson models.Person) *models.TransactionResponse {
+	mongoClient := connectToMongoDB()
+
+	peopleCollection := mongoClient.Database(dbName).Collection(collectionName)
+
+	var transactionResponse *models.TransactionResponse
+
+	res, err := peopleCollection.InsertOne(context.TODO(), insertedPerson)
+	transactionResponse.IsSuccess = checkError(err)
+
+	if err != nil {
+		transactionResponse.Message = err.Error()
+	} else {
+		transactionResponse.Message = fmt.Sprintf("Object Id: %s inserted !", res.InsertedID)
+	}
+
+	return transactionResponse
+}
+
 func getPeopleByFilter(filter bson.M) []*models.Person {
 	var people []*models.Person
 
 	mongoClient := connectToMongoDB()
 
-	cur, err := mongoClient.Database("my_apps_db").Collection("people").Find(context.TODO(), filter)
+	cur, err := mongoClient.Database(dbName).Collection(collectionName).Find(context.TODO(), filter)
 	checkError(err)
 
 	for cur.Next(context.TODO()) {

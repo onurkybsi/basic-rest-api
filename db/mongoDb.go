@@ -17,9 +17,7 @@ func checkError(err error) {
 	}
 }
 
-const mongoPass string = "?"
-
-var mongoConnectionURI string = fmt.Sprintf("mongodb+srv://admin:%s@mymongodb.oiync.mongodb.net/my-apps-db?retryWrites=true&w=majority", mongoPass)
+const mongoConnectionURI string = "mongodb://localhost:27017/my_apps_db"
 
 // GetAllPeople : Return all data from "people" collection of "my_apps_db" database
 func GetAllPeople() []*models.Person {

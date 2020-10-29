@@ -26,6 +26,7 @@ func GetPeopleByName(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	r.Body.Close()
 
 	res := db.GetPeopleByName(searchModel.Name)
 
@@ -42,6 +43,7 @@ func InsertPerson(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	r.Body.Close()
 
 	res := db.InsertPerson(insertedPerson)
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/basic-rest-api/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -44,15 +45,16 @@ func GetPeopleByName(name string) []*models.Person {
 }
 
 // InsertPerson : Insert given Person document
-func InsertPerson(insertedPerson models.Person) *models.TransactionResponse {
+func InsertPerson(insertedPerson models.Person) models.TransactionResponse {
 	mongoClient := connectToMongoDB()
-
 	peopleCollection := mongoClient.Database(dbName).Collection(collectionName)
 
-	var transactionResponse *models.TransactionResponse
+	transactionResponse := models.TransactionResponse{IsSuccess: false}
+
+	insertedPerson.SystemEntryDate = time.Now()
 
 	res, err := peopleCollection.InsertOne(context.TODO(), insertedPerson)
-	transactionResponse.IsSuccess = checkError(err)
+	transactionResponse.IsSuccess = !checkError(err)
 
 	if err != nil {
 		transactionResponse.Message = err.Error()
@@ -60,16 +62,16 @@ func InsertPerson(insertedPerson models.Person) *models.TransactionResponse {
 		transactionResponse.Message = fmt.Sprintf("Object Id: %s inserted !", res.InsertedID)
 	}
 
+	defer mongoClient.Disconnect(context.TODO())
 	return transactionResponse
 }
 
 func getPeopleByFilter(filter bson.M) []*models.Person {
-	var people []*models.Person
-
 	mongoClient := connectToMongoDB()
-
 	cur, err := mongoClient.Database(dbName).Collection(collectionName).Find(context.TODO(), filter)
 	checkError(err)
+
+	var people []*models.Person
 
 	for cur.Next(context.TODO()) {
 
@@ -85,7 +87,6 @@ func getPeopleByFilter(filter bson.M) []*models.Person {
 	}
 
 	defer mongoClient.Disconnect(context.TODO())
-
 	return people
 }
 

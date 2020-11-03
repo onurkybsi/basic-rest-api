@@ -12,8 +12,9 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/people", controllers.GetPeople).Methods("GET")
-	router.HandleFunc("/people", controllers.GetPeopleByName).Methods("POST")
-	router.HandleFunc("/people/insert", controllers.InsertPerson).Methods("POST")
+	router.HandleFunc("/people", controllers.GetPeopleByName).Methods("GET")
+	router.HandleFunc("/people", controllers.InsertPerson).Methods("POST")
+	router.HandleFunc("/people/{ID}", controllers.UpdatePerson).Methods("PUT")
 
 	fmt.Println("Listening on 8000...")
 

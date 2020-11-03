@@ -8,6 +8,7 @@ import (
 
 	"github.com/basic-rest-api/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -60,6 +61,30 @@ func InsertPerson(insertedPerson models.Person) models.TransactionResponse {
 		transactionResponse.Message = err.Error()
 	} else {
 		transactionResponse.Message = fmt.Sprintf("Object Id: %s inserted !", res.InsertedID)
+	}
+
+	defer mongoClient.Disconnect(context.TODO())
+	return transactionResponse
+}
+
+// UpdatePersonByID : Update given Person document by Id
+func UpdatePersonByID(id string, updatedPerson models.Person) models.TransactionResponse {
+	mongoClient := connectToMongoDB()
+	peopleCollection := mongoClient.Database(dbName).Collection(collectionName)
+
+	transactionResponse := models.TransactionResponse{IsSuccess: false}
+
+	objectID, _ := primitive.ObjectIDFromHex(id)
+
+	_, err := peopleCollection.UpdateOne(context.TODO(), bson.M{"_id": objectID}, bson.M{
+		"$push": bson.M{"updatedPerson": updatedPerson},
+	})
+	transactionResponse.IsSuccess = !checkError(err)
+
+	if err != nil {
+		transactionResponse.Message = err.Error()
+	} else {
+		transactionResponse.Message = fmt.Sprintf("Object Id: %s inserted !", id)
 	}
 
 	defer mongoClient.Disconnect(context.TODO())

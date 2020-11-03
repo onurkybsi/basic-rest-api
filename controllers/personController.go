@@ -6,6 +6,7 @@ import (
 
 	"github.com/basic-rest-api/db"
 	"github.com/basic-rest-api/models"
+	"github.com/gorilla/mux"
 )
 
 // GetPeople : Get all people
@@ -46,6 +47,25 @@ func InsertPerson(w http.ResponseWriter, r *http.Request) {
 	r.Body.Close()
 
 	res := db.InsertPerson(insertedPerson)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(res)
+}
+
+// UpdatePerson : Update given Person object by Id
+func UpdatePerson(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	var updatedPerson models.Person
+
+	err := json.NewDecoder(r.Body).Decode(&updatedPerson)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	r.Body.Close()
+
+	res := db.UpdatePersonByID(vars["ID"], updatedPerson)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(res)

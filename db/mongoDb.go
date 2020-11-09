@@ -53,6 +53,7 @@ func InsertPerson(insertedPerson models.Person) models.TransactionResponse {
 	transactionResponse := models.TransactionResponse{IsSuccess: false}
 
 	insertedPerson.SystemEntryDate = time.Now()
+	insertedPerson.UpdatedTime = time.Now()
 
 	res, err := peopleCollection.InsertOne(context.TODO(), insertedPerson)
 	transactionResponse.IsSuccess = !checkError(err)
@@ -76,15 +77,19 @@ func UpdatePersonByID(id string, updatedPerson models.Person) models.Transaction
 
 	objectID, _ := primitive.ObjectIDFromHex(id)
 
-	_, err := peopleCollection.UpdateOne(context.TODO(), bson.M{"_id": objectID}, bson.M{
-		"$push": bson.M{"updatedPerson": updatedPerson},
-	})
+	_, err := peopleCollection.UpdateOne(context.TODO(), bson.M{"_id": objectID}, bson.M{"$set": bson.M{
+		"firstName":   updatedPerson.FirstName,
+		"lastName":    updatedPerson.LastName,
+		"birthdate":   updatedPerson.Birthdate,
+		"email":       updatedPerson.Email,
+		"updatedTime": time.Now().String()}})
+
 	transactionResponse.IsSuccess = !checkError(err)
 
 	if err != nil {
 		transactionResponse.Message = err.Error()
 	} else {
-		transactionResponse.Message = fmt.Sprintf("Object Id: %s inserted !", id)
+		transactionResponse.Message = fmt.Sprintf("Object Id: %s updated !", id)
 	}
 
 	defer mongoClient.Disconnect(context.TODO())

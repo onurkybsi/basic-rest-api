@@ -15,6 +15,7 @@ func main() {
 	router.HandleFunc("/people", controllers.GetPeopleByName).Methods("GET")
 	router.HandleFunc("/people", controllers.InsertPerson).Methods("POST")
 	router.HandleFunc("/people/{ID}", controllers.UpdatePerson).Methods("PUT")
+	router.HandleFunc("/people/{ID}", controllers.DeletePerson).Methods("DELETE")
 
 	fmt.Println("Listening on 8000...")
 

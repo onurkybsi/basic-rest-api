@@ -50,7 +50,7 @@ func InsertPerson(insertedPerson models.Person) models.TransactionResponse {
 	mongoClient := connectToMongoDB()
 	peopleCollection := mongoClient.Database(dbName).Collection(collectionName)
 
-	transactionResponse := models.TransactionResponse{IsSuccess: false}
+	transactionResponse := models.TransactionResponse{IsSuccess: true}
 
 	insertedPerson.SystemEntryDate = time.Now()
 	insertedPerson.UpdatedTime = time.Now()
@@ -60,6 +60,7 @@ func InsertPerson(insertedPerson models.Person) models.TransactionResponse {
 
 	if err != nil {
 		transactionResponse.Message = err.Error()
+		transactionResponse.IsSuccess = false
 	} else {
 		transactionResponse.Message = fmt.Sprintf("Object Id: %s inserted !", res.InsertedID)
 	}
@@ -73,7 +74,7 @@ func UpdatePersonByID(id string, updatedPerson models.Person) models.Transaction
 	mongoClient := connectToMongoDB()
 	peopleCollection := mongoClient.Database(dbName).Collection(collectionName)
 
-	transactionResponse := models.TransactionResponse{IsSuccess: false}
+	transactionResponse := models.TransactionResponse{IsSuccess: true}
 
 	objectID, _ := primitive.ObjectIDFromHex(id)
 
@@ -88,8 +89,31 @@ func UpdatePersonByID(id string, updatedPerson models.Person) models.Transaction
 
 	if err != nil {
 		transactionResponse.Message = err.Error()
+		transactionResponse.IsSuccess = false
 	} else {
 		transactionResponse.Message = fmt.Sprintf("Object Id: %s updated !", id)
+	}
+
+	defer mongoClient.Disconnect(context.TODO())
+	return transactionResponse
+}
+
+// DeletePersonByID : Delete person from collection by Id
+func DeletePersonByID(id string) models.TransactionResponse {
+	mongoClient := connectToMongoDB()
+	peopleCollection := mongoClient.Database(dbName).Collection(collectionName)
+
+	transactionResponse := models.TransactionResponse{IsSuccess: true}
+
+	objectID, _ := primitive.ObjectIDFromHex(id)
+
+	_, err := peopleCollection.DeleteOne(context.TODO(), bson.M{"_id": objectID})
+
+	if err != nil {
+		transactionResponse.Message = err.Error()
+		transactionResponse.IsSuccess = false
+	} else {
+		transactionResponse.Message = fmt.Sprintf("Object Id: %s deleted !", id)
 	}
 
 	defer mongoClient.Disconnect(context.TODO())

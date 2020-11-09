@@ -70,3 +70,13 @@ func UpdatePerson(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(res)
 }
+
+// DeletePerson : Delete Person by Id
+func DeletePerson(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	res := db.DeletePersonByID(vars["ID"])
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(res)
+}
